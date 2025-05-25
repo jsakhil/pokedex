@@ -35,9 +35,10 @@ export const usePokemonTypes = () => {
 
 const getIdFromUrl = (url: string) => {
   const parts = url.split('/').filter(Boolean);
-  const id = parts[parts.length - 2];
+  const id = parts[parts.length - 1];
   if (!id) return '';
-  return id;
+  if (parseInt(id, 10) > 999) return id;
+  return id.padStart(3, '0');
 };
 
 export const usePokemonList = (type: string = '', search: string = '') => {
@@ -89,7 +90,7 @@ export const usePokemonList = (type: string = '', search: string = '') => {
             return;
           }
           const pokemonData = matches.map((p: any) => {
-            const id = p.url ? getIdFromUrl(p.url) : p.name;
+            const id = p.url ? getIdFromUrl(p.url) : '';
             return {
               id,
               name: p.name,

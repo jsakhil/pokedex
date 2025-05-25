@@ -58,6 +58,11 @@ export const SearchForm = ({
             type="text"
             value={inputValue}
             onChange={(e) => setInputValue(e.target.value)}
+            onKeyDown={(e) => {
+              if (e.key === 'Enter') {
+                handleSearch();
+              }
+            }}
             placeholder="Search..."
             className="pl-10 pr-2 py-2 border border-r-0 rounded-l-lg rounded-r-none focus:outline-none focus:ring-2 focus:ring-blue-500 w-full h-12"
           />
