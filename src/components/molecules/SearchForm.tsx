@@ -33,18 +33,18 @@ export const SearchForm = ({
       <div className="flex flex-col gap-4 items-start">
         <select
           value={selectValue}
-          onChange={(e) => setSelectValue(e.target.value)}
+          onChange={(e) => {
+            const newType = e.target.value;
+            setSelectValue(newType);
+            onTypeChange(newType);
+          }}
           className="flex-1 p-2 border rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 min-w-[50%]"
           disabled={loading}
         >
-          <option value="" disabled hidden>
-            Select
-          </option>
+          <option value="" disabled hidden>Select</option>
           <option value="">All Types</option>
           {types.map((type) => (
-            <option key={type.name} value={type.name}>
-              {type.name.charAt(0).toUpperCase() + type.name.slice(1)}
-            </option>
+            <option key={type.name} value={type.name}>{type.name.charAt(0).toUpperCase() + type.name.slice(1)}</option>
           ))}
         </select>
         <div className="relative flex-1 min-w-[75%] flex">
@@ -67,9 +67,7 @@ export const SearchForm = ({
               className="bg-[#133a50] text-white px-6 h-12 rounded-r-lg rounded-l-none font-medium hover:bg-blue-700 transition-colors min-w-[100px] border border-l-0 border-[#133a50]"
               tabIndex={-1}
               onClick={handleSearch}
-            >
-              Search
-            </button>
+            >Search</button>
           )}
         </div>
       </div>

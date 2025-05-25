@@ -35,10 +35,9 @@ export const usePokemonTypes = () => {
 
 const getIdFromUrl = (url: string) => {
   const parts = url.split('/').filter(Boolean);
-  const id = parts[parts.length - 1];
+  const id = parts[parts.length - 2];
   if (!id) return '';
-  if (parseInt(id, 10) > 999) return id;
-  return id.padStart(3, '0');
+  return id;
 };
 
 export const usePokemonList = (type: string = '', search: string = '') => {
@@ -48,12 +47,16 @@ export const usePokemonList = (type: string = '', search: string = '') => {
   const [next, setNext] = useState<string | null>(null);
   const [loadingMore, setLoadingMore] = useState(false);
   const allPokemonList = useRef<any[] | null>(null);
+  const typeOffset = useRef(0);
+  const TYPE_LIMIT = 151;
 
   useEffect(() => {
     const fetchPokemon = async () => {
       try {
         setLoading(true);
         setError(null);
+        typeOffset.current = 0;
+        
         if (search) {
           if (!allPokemonList.current) {
             const data = await getAllPokemonList();
@@ -106,30 +109,30 @@ export const usePokemonList = (type: string = '', search: string = '') => {
         }
         let list: any[] = [];
         let nextUrl: string | null = null;
+        
         if (type) {
           const pokemonList = await getPokemonByType(type);
-          list = pokemonList;
-          nextUrl = null;
+          list = pokemonList.slice(0, TYPE_LIMIT);
+          typeOffset.current = TYPE_LIMIT;
+          nextUrl = pokemonList.length > TYPE_LIMIT ? 'more' : null;
         } else {
           const data = await getPokemonList();
           list = data.results;
           nextUrl = data.next;
         }
-        const pokemonData = list.map((p: any) => {
-          const id = p.url ? getIdFromUrl(p.url) : p.name;
-          return {
-            id,
-            name: p.name,
-            sprites: {
-              other: {
-                'official-artwork': {
-                  front_default: `${SPRITE_BASE_URL}/${id}.png`,
-                },
-              },
-            },
-            types: [],
-          };
-        });
+
+        const pokemonData = await Promise.all(
+          list.map(async (p: any) => {
+            const details = await getPokemonDetails(p.name);
+            return {
+              id: details.id,
+              name: details.name,
+              sprites: details.sprites,
+              types: details.types,
+            };
+          })
+        );
+        
         setPokemon(pokemonData);
         setNext(nextUrl);
       } catch (err) {
@@ -143,27 +146,44 @@ export const usePokemonList = (type: string = '', search: string = '') => {
   }, [type, search]);
 
   const loadMore = async () => {
-    if (!next) return;
+    if (!next && !type) return;
     setLoadingMore(true);
     try {
-      const data = await getPokemonList(next);
-      const newPokemon = data.results.map((p: any) => {
-        const id = p.url ? getIdFromUrl(p.url) : p.name;
-        return {
-          id,
-          name: p.name,
-          sprites: {
-            other: {
-              'official-artwork': {
-                front_default: `${SPRITE_BASE_URL}/${id}.png`,
-              },
-            },
-          },
-          types: [],
-        };
-      });
-      setPokemon((prev) => [...prev, ...newPokemon]);
-      setNext(data.next);
+      if (type) {
+        const pokemonList = await getPokemonByType(type);
+        const newList = pokemonList.slice(typeOffset.current, typeOffset.current + TYPE_LIMIT);
+        typeOffset.current += TYPE_LIMIT;
+        
+        const newPokemon = await Promise.all(
+          newList.map(async (p: any) => {
+            const details = await getPokemonDetails(p.name);
+            return {
+              id: details.id,
+              name: details.name,
+              sprites: details.sprites,
+              types: details.types,
+            };
+          })
+        );
+        
+        setPokemon((prev) => [...prev, ...newPokemon]);
+        setNext(typeOffset.current < pokemonList.length ? 'more' : null);
+      } else if (next) {
+        const data = await getPokemonList(next);
+        const newPokemon = await Promise.all(
+          data.results.map(async (p: any) => {
+            const details = await getPokemonDetails(p.name);
+            return {
+              id: details.id,
+              name: details.name,
+              sprites: details.sprites,
+              types: details.types,
+            };
+          })
+        );
+        setPokemon((prev) => [...prev, ...newPokemon]);
+        setNext(data.next);
+      }
     } catch (err) {
       console.log("🚀 ~ loadMore ~ err:", err)
       setError('Failed to load more Pokemon');
@@ -176,7 +196,7 @@ export const usePokemonList = (type: string = '', search: string = '') => {
     pokemon,
     loading,
     error,
-    hasMore: !search && !!next,
+    hasMore: (type && next === 'more') || (!type && !!next),
     loadMore,
     loadingMore,
   };
