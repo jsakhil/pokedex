@@ -29,8 +29,8 @@ export const SearchForm = ({
   };
 
   return (
-    <div className="w-full max-w-2xl">
-      <div className="flex flex-col gap-4 items-start">
+    <div className="w-full">
+      <div className="flex flex-col md:flex-row gap-4 items-start justify-between">
         <select
           value={selectValue}
           onChange={(e) => {
@@ -38,7 +38,7 @@ export const SearchForm = ({
             setSelectValue(newType);
             onTypeChange(newType);
           }}
-          className="flex-1 p-2 border rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 min-w-[50%]"
+          className="p-2 border rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 min-h-[48px] min-w-[100%] md:min-w-[25%]"
           disabled={loading}
         >
           <option value="" disabled hidden>Select</option>
@@ -47,7 +47,7 @@ export const SearchForm = ({
             <option key={type.name} value={type.name}>{type.name.charAt(0).toUpperCase() + type.name.slice(1)}</option>
           ))}
         </select>
-        <div className="relative flex-1 min-w-[75%] flex">
+        <div className="relative flex min-w-[100%] md:min-w-[50%]">
           <span className="absolute left-3 top-1/2 -translate-y-1/2 text-gray-400 pointer-events-none">
             <svg width="18" height="18" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth="2">
               <circle cx="11" cy="11" r="7" />
