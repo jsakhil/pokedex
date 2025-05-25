@@ -1,5 +1,5 @@
 import { useState, useEffect, useRef } from 'react';
-import { Pokemon, PokemonType } from '@/types/pokemon';
+import { PokemonType } from '@/types/pokemon';
 import {
   getPokemonTypes,
   getPokemonList,
@@ -21,6 +21,7 @@ export const usePokemonTypes = () => {
         const types = await getPokemonTypes();
         setTypes(types);
       } catch (err) {
+        console.log("🚀 ~ fetchTypes ~ err:", err)
         setError('Failed to fetch Pokemon types');
       } finally {
         setLoading(false);
@@ -132,6 +133,7 @@ export const usePokemonList = (type: string = '', search: string = '') => {
         setPokemon(pokemonData);
         setNext(nextUrl);
       } catch (err) {
+        console.log("🚀 ~ fetchPokemon ~ err:", err)
         setError('Failed to fetch Pokemon');
       } finally {
         setLoading(false);
@@ -163,6 +165,7 @@ export const usePokemonList = (type: string = '', search: string = '') => {
       setPokemon((prev) => [...prev, ...newPokemon]);
       setNext(data.next);
     } catch (err) {
+      console.log("🚀 ~ loadMore ~ err:", err)
       setError('Failed to load more Pokemon');
     } finally {
       setLoadingMore(false);

@@ -32,7 +32,7 @@ export default function Home() {
         )}
         {!loading && !error && pokemon.length === 0 && (
           <div className="text-center text-gray-500 text-lg mt-12">
-            Looks like that Pokemon's not in our Pokedex yet!
+            Looks like that Pokemon&apos;s not in our Pokedex yet!
           </div>
         )}
         {!loading && !error && pokemon.length > 0 && (
